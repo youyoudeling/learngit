@@ -6,4 +6,5 @@
     <color name="color_selector">#ffffff</color>
     <color name="tab_checked">#FA4C48</color>
     <color name="tab_unchecked">#757575</color>
+    <color name="colorBackground">#FFFFFF</color>
 </resources>
