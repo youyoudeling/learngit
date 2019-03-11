@@ -27,8 +27,8 @@ public class FragmentTag extends Fragment {
     private String[] data={};
     private Button button;
 
-    public ArrayAdapter<String> adapter;
-
+    //public ArrayAdapter<String> adapter;
+    public TagAdapter adapter;
 
 
 
@@ -46,7 +46,7 @@ public class FragmentTag extends Fragment {
         // Inflate the layout for this fragment
         View view=inflater.inflate(R.layout.fragment_tag_layout, container, false);
         //adapter=new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1,Data.getTag())
-        TagAdapter adapter=new TagAdapter(getActivity(),R.layout.tag_item,Data.getTagList());
+        adapter=new TagAdapter(getActivity(),R.layout.tag_item,Data.getTagList());
         ListView listView=(ListView) view.findViewById(R.id.tag_list);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -86,7 +86,7 @@ public class FragmentTag extends Fragment {
                 Data.tagListAdd(item);
                 Toast.makeText(getActivity(),item.getText(),Toast.LENGTH_SHORT).show();
 
-               // adapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
 
             }
         }).show();
@@ -105,7 +105,7 @@ public class FragmentTag extends Fragment {
                 //Data.tag(editText.getText().toString());
                 Toast.makeText(getActivity(),editText.getText().toString(),Toast.LENGTH_SHORT).show();
 
-                //adapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
 
             }
         }).show();

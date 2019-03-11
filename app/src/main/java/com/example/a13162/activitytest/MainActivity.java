@@ -87,16 +87,22 @@ public class MainActivity extends BaseNfcActivity {
             Ndef ndef = Ndef.get(detectedTag);
             //mTagText = ndef.getType() + "\nmaxsize:" + ndef.getMaxSize() + "bytes\n\n";
             readNfcTag(intent);
-            Log.d("abcd",mTagText);
+            if(mTagText!=null)
+                Log.d("abcd",mTagText);
+            else
+                Log.d("abcd","msg is null");
             viewPager.setCurrentItem(2);
-            showInputDialog(mTagText);
+            tag.showInputDialog(mTagText);
         }else if(Data.getIsactive()==1){
             Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             //2.获取Ndef的实例
             Ndef ndef = Ndef.get(detectedTag);
             //mTagText = ndef.getType() + "\nmaxsize:" + ndef.getMaxSize() + "bytes\n\n";
             readNfcTag(intent);
-            Log.d("abcde",mTagText);
+            if(mTagText!=null)
+                Log.d("abcde",mTagText);
+            else
+                Log.d("abcde","msg is null");
             AlertDialog.Builder dialog=new AlertDialog.Builder(MainActivity.this);
             dialog.setTitle("NFC标签内容");
             dialog.setMessage(mTagText);
@@ -253,20 +259,21 @@ public class MainActivity extends BaseNfcActivity {
             throw new IllegalArgumentException();
         }
     }
-    public void showInputDialog(String text){
-        final EditText editText=new EditText(MainActivity.this);
-        AlertDialog.Builder inputDialog=new AlertDialog.Builder(MainActivity.this);
-        inputDialog.setTitle("存取该id信息").setView(editText);
-        editText.setText(text);
-        inputDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                TagClass item=new TagClass(editText.getText().toString(),"内容");
-                Data.tagListAdd(item);
-                Toast.makeText(MainActivity.this,editText.getText().toString(),Toast.LENGTH_SHORT).show();
-
-            }
-        }).show();
-    }
+//    public void showInputDialog(String text){
+//        final EditText editText=new EditText(MainActivity.this);
+//        AlertDialog.Builder inputDialog=new AlertDialog.Builder(MainActivity.this);
+//        inputDialog.setTitle("存取该id信息").setView(editText);
+//        editText.setText(text);
+//        inputDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                TagClass item=new TagClass(editText.getText().toString(),"内容");
+//                Data.tagListAdd(item);
+//                Toast.makeText(MainActivity.this,editText.getText().toString(),Toast.LENGTH_SHORT).show();
+//
+//            }
+//        }).show();
+//        tag.adapter.notifyDataSetChanged();
+//    }
 }
 
