@@ -73,16 +73,24 @@ public class FragmentTag extends Fragment {
 
     }
     public void showInputDialog(){
-        final EditText editText=new EditText(getActivity());
+        //final EditText editText=new EditText(getActivity());
+        LayoutInflater factory = LayoutInflater.from(getActivity());
+        final View textEntryView = factory.inflate(R.layout.dialog,null);
+
+        final EditText editTextTitle = (EditText)textEntryView.findViewById(R.id.editTextTitle);
+        final EditText editTextContent = (EditText)textEntryView.findViewById(R.id.editTextContent);
+
         AlertDialog.Builder inputDialog=new AlertDialog.Builder(getActivity());
-        inputDialog.setTitle("请输入要存取的id信息").setView(editText);
+        //inputDialog.setTitle("请输入要存取的id信息").setView(editText);
+        inputDialog.setTitle("请输入要存取的id信息");
+        inputDialog.setView(textEntryView);
         inputDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
                 //Data.addTag(editText.getText().toString());
-                Toast.makeText(getActivity(),editText.getText().toString(),Toast.LENGTH_SHORT).show();
-                TagClass item=new TagClass(editText.getText().toString(),"内容");
+                Toast.makeText(getActivity(),editTextContent.getText().toString(),Toast.LENGTH_SHORT).show();
+                TagClass item=new TagClass(editTextTitle.getText().toString(),editTextContent.getText().toString());
                 Data.tagListAdd(item);
                 Toast.makeText(getActivity(),item.getText(),Toast.LENGTH_SHORT).show();
 
@@ -93,17 +101,26 @@ public class FragmentTag extends Fragment {
     }
 
     public void showInputDialog(String text){
-        final EditText editText=new EditText(getActivity());
+        //final EditText editText=new EditText(getActivity());
+        LayoutInflater factory = LayoutInflater.from(getActivity());
+        final View textEntryView = factory.inflate(R.layout.dialog,null);
+
+        final EditText editTextTitle = (EditText)textEntryView.findViewById(R.id.editTextTitle);
+        final EditText editTextContent = (EditText)textEntryView.findViewById(R.id.editTextContent);
+
         AlertDialog.Builder inputDialog=new AlertDialog.Builder(getActivity());
-        inputDialog.setTitle("存取该id信息").setView(editText);
-        editText.setText(text);
+        //inputDialog.setTitle("存取该id信息").setView(editText);
+        inputDialog.setTitle("请输入要存取的id信息");
+        inputDialog.setView(textEntryView);
+        editTextTitle.setText("nfc tag");
+        editTextContent.setText(text);
         inputDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                TagClass item=new TagClass(editText.getText().toString(),"内容");
+                TagClass item=new TagClass(editTextTitle.getText().toString(),editTextContent.getText().toString());
                 Data.tagListAdd(item);
                 //Data.tag(editText.getText().toString());
-                Toast.makeText(getActivity(),editText.getText().toString(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(),editTextContent.getText().toString(),Toast.LENGTH_SHORT).show();
 
                 adapter.notifyDataSetChanged();
 
