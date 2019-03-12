@@ -2,10 +2,13 @@ package com.example.a13162.activitytest;
 
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +22,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.os.ParcelFileDescriptor.MODE_APPEND;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -26,6 +31,8 @@ public class FragmentTag extends Fragment {
 
     private String[] data={};
     private Button button;
+    private int i=0;
+    private int k=0;
 
     //public ArrayAdapter<String> adapter;
     public TagAdapter adapter;
@@ -44,6 +51,19 @@ public class FragmentTag extends Fragment {
         //Data.tagListAdd(apple);
         //Data.tagListAdd(banana);
         // Inflate the layout for this fragment
+        SharedPreferences pref=getContext().getSharedPreferences("data",MODE_APPEND);
+        i=pref.getInt("number",0);
+        Log.d("abcd","i is "+i);
+        String editTextTitle,editTextContent;
+        for(k=1;k<=i;k++) {
+            editTextTitle=pref.getString("title"+k, "").toString();
+            editTextContent=pref.getString("content"+k, "").toString();
+
+            TagClass item=new TagClass(editTextTitle,editTextContent);
+            Data.tagListAdd(item);
+        }
+
+
         View view=inflater.inflate(R.layout.fragment_tag_layout, container, false);
         //adapter=new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1,Data.getTag())
         adapter=new TagAdapter(getActivity(),R.layout.tag_item,Data.getTagList());
@@ -92,7 +112,15 @@ public class FragmentTag extends Fragment {
                 Toast.makeText(getActivity(),editTextContent.getText().toString(),Toast.LENGTH_SHORT).show();
                 TagClass item=new TagClass(editTextTitle.getText().toString(),editTextContent.getText().toString());
                 Data.tagListAdd(item);
-                Toast.makeText(getActivity(),item.getText(),Toast.LENGTH_SHORT).show();
+
+                saveData(editTextTitle.getText().toString(),editTextContent.getText().toString());
+
+                //Data.tag(editText.getText().toString());
+                //Toast.makeText(getActivity(),editTextContent.getText().toString(),Toast.LENGTH_SHORT).show();
+
+
+
+                //Toast.makeText(getActivity(),item.getText(),Toast.LENGTH_SHORT).show();
 
                 adapter.notifyDataSetChanged();
 
@@ -119,13 +147,29 @@ public class FragmentTag extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
                 TagClass item=new TagClass(editTextTitle.getText().toString(),editTextContent.getText().toString());
                 Data.tagListAdd(item);
+
+                saveData(editTextTitle.getText().toString(),editTextContent.getText().toString());
+
+
                 //Data.tag(editText.getText().toString());
-                Toast.makeText(getActivity(),editTextContent.getText().toString(),Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(),editTextContent.getText().toString(),Toast.LENGTH_SHORT).show();
 
                 adapter.notifyDataSetChanged();
 
             }
         }).show();
+    }
+
+    private void saveData(String title,String content){
+
+        i++;
+        SharedPreferences.Editor editor= getContext().getSharedPreferences("data",Context.MODE_PRIVATE).edit();
+        Log.d("abcde","i is "+i);
+        editor.putString("title"+i,title);
+        editor.putString("content"+i,content);
+        editor.putInt("number",i);
+        editor.apply();
+
     }
 
 

@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -42,6 +43,8 @@ import com.google.zxing.integration.android.IntentResult;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static android.os.ParcelFileDescriptor.MODE_APPEND;
 
 public class MainActivity extends BaseNfcActivity {
     String mTagText;
@@ -119,6 +122,7 @@ public class MainActivity extends BaseNfcActivity {
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottomNavigationView);
         bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         BottomNavigationViewHelper.disableShiftMode(bottomNavigationView);
+
         viewPager = (ViewPager) findViewById(R.id.vp);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -275,5 +279,6 @@ public class MainActivity extends BaseNfcActivity {
 //        }).show();
 //        tag.adapter.notifyDataSetChanged();
 //    }
+
 }
 
