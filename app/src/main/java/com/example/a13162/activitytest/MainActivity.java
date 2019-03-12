@@ -148,7 +148,7 @@ public class MainActivity extends BaseNfcActivity {
         list.add(TestFragment.newInstance("首页"));
         list.add(f);//nfc页面
         list.add(tag);//标签页面
-        list.add(TestFragment.newInstance("。。"));
+        //list.add(TestFragment.newInstance("。。"));
         viewPagerAdapter.setList(list);
 
     }

@@ -58,7 +58,7 @@ public class FragamentNfc extends Fragment {
             public void onClick(View v) {
                 switch (Data.getIsactive()){
                     case 1:
-                        imageView.setImageResource(R.drawable.nfc);
+                        imageView.setImageResource(R.drawable.nfckaifa);
                         Toast.makeText(getActivity(),"开发者模式已开启",Toast.LENGTH_SHORT).show();
                         Data.change();
                         //Intent intent1=new Intent(this,ReadTextActivity.class);
@@ -68,7 +68,7 @@ public class FragamentNfc extends Fragment {
                         //showInputDialog(mTagText);
                         break;
                     case 0:
-                        imageView.setImageResource(R.drawable.nfcpage);
+                        imageView.setImageResource(R.drawable.nfcyingyong);
                         Toast.makeText(getActivity(),"应用者模式已开启",Toast.LENGTH_SHORT).show();
                         Data.change();
 

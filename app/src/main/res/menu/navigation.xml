@@ -10,8 +10,8 @@
         android:title="NFC" />
     <item
         android:id="@+id/navigation_notifications"
-        android:icon="@drawable/renxiang"
-        android:title="个人" />
+        android:icon="@drawable/caidao"
+        android:title="菜单" />
     <!--<item
         android:id="@+id/navigation_person"
         android:icon="@drawable/shouye"
