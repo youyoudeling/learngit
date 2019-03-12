@@ -40,6 +40,12 @@ import android.widget.Toast;
 import com.google.android.gms.common.internal.Constants;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.tencent.mm.opensdk.constants.ConstantsAPI;
+import com.tencent.mm.opensdk.modelbase.BaseResp;
+import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,6 +62,8 @@ public class MainActivity extends BaseNfcActivity {
     private PendingIntent mPendingIntent;
     private FragmentTag tag;
     private FragamentNfc f;
+
+    private boolean startFlag=false;     //用于判断是否是在外面扫的小程序
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar,menu);
@@ -82,36 +90,8 @@ public class MainActivity extends BaseNfcActivity {
     }
     @Override
     public void onNewIntent(Intent intent) {
-
-        if(Data.getIsactive()==0){
-            //1.获取Tag对象
-            Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            //2.获取Ndef的实例
-            Ndef ndef = Ndef.get(detectedTag);
-            //mTagText = ndef.getType() + "\nmaxsize:" + ndef.getMaxSize() + "bytes\n\n";
-            readNfcTag(intent);
-            if(mTagText!=null)
-                Log.d("abcd",mTagText);
-            else
-                Log.d("abcd","msg is null");
-            viewPager.setCurrentItem(2);
-            tag.showInputDialog(mTagText);
-        }else if(Data.getIsactive()==1){
-            Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            //2.获取Ndef的实例
-            Ndef ndef = Ndef.get(detectedTag);
-            //mTagText = ndef.getType() + "\nmaxsize:" + ndef.getMaxSize() + "bytes\n\n";
-            readNfcTag(intent);
-            if(mTagText!=null)
-                Log.d("abcde",mTagText);
-            else
-                Log.d("abcde","msg is null");
-            AlertDialog.Builder dialog=new AlertDialog.Builder(MainActivity.this);
-            dialog.setTitle("NFC标签内容");
-            dialog.setMessage(mTagText);
-            dialog.show();
-        }
-
+        Log.d("abcd","a new intent");
+        resolveIntent(intent);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,6 +134,11 @@ public class MainActivity extends BaseNfcActivity {
         list.add(tag);//标签页面
         //list.add(TestFragment.newInstance("。。"));
         viewPagerAdapter.setList(list);
+
+        startFlag=true;
+        //直接跳转小程序
+        resolveIntent(getIntent());
+        startFlag=false;
 
     }
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -263,22 +248,89 @@ public class MainActivity extends BaseNfcActivity {
             throw new IllegalArgumentException();
         }
     }
-//    public void showInputDialog(String text){
-//        final EditText editText=new EditText(MainActivity.this);
-//        AlertDialog.Builder inputDialog=new AlertDialog.Builder(MainActivity.this);
-//        inputDialog.setTitle("存取该id信息").setView(editText);
-//        editText.setText(text);
-//        inputDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                TagClass item=new TagClass(editText.getText().toString(),"内容");
-//                Data.tagListAdd(item);
-//                Toast.makeText(MainActivity.this,editText.getText().toString(),Toast.LENGTH_SHORT).show();
-//
-//            }
-//        }).show();
-//        tag.adapter.notifyDataSetChanged();
-//    }
+
+    public void onResp(BaseResp resp) {
+        if (resp.getType() == ConstantsAPI.COMMAND_LAUNCH_WX_MINIPROGRAM) {
+            WXLaunchMiniProgram.Resp launchMiniProResp = (WXLaunchMiniProgram.Resp) resp;
+            String extraData =launchMiniProResp.extMsg; //对应小程序组件 <button open-type="launchApp"> 中的 app-parameter 属性
+        }
+    }
+
+    private void resolveIntent(Intent intent){
+        String action=intent.getAction();
+        if(NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)
+                || NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)
+                || NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)){
+
+            //1.获取Tag对象
+            Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            //2.获取Ndef的实例
+            Ndef ndef = Ndef.get(detectedTag);
+            //mTagText = ndef.getType() + "\nmaxsize:" + ndef.getMaxSize() + "bytes\n\n";
+            readNfcTag(intent);
+            if(mTagText!=null)
+                Log.d("abcd",mTagText);
+            else
+                Log.d("abcd","msg is null");
+
+            String xcx=null;
+            if(mTagText.indexOf("xcx:")==0){
+                xcx=mTagText.substring(4);
+                Log.d("xcx",xcx);
+
+            }
+            //在外面扫到小程序直接跳
+            if(startFlag==true&&xcx!=null){
+                startFlag=false;
+                jumpToXCX(xcx);
+                return;
+            }
+
+            if(Data.getIsactive()==0){
+                viewPager.setCurrentItem(2);
+                tag.showInputDialog(mTagText);
+            }else if(Data.getIsactive()==1){
+                if(xcx!=null){
+                    final String str=xcx;
+                    AlertDialog.Builder dialog=new AlertDialog.Builder(MainActivity.this);
+                    dialog.setTitle("发现一个小程序");
+                    dialog.setMessage("是否跳转？");
+                    dialog.setPositiveButton("跳转", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            jumpToXCX(str);
+                        }
+                    });
+                    dialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    dialog.show();
+                }else{
+                    AlertDialog.Builder dialog=new AlertDialog.Builder(MainActivity.this);
+                    dialog.setTitle("NFC标签内容");
+                    dialog.setMessage(mTagText);
+                    dialog.show();
+                }
+
+
+            }
+        }
+    }
+    //跳转小程序
+    private void jumpToXCX(String xcxid){
+        String appId = "wx22f60e47bd1eb936"; // 填应用AppId
+        IWXAPI api = WXAPIFactory.createWXAPI(MainActivity.this, appId);
+
+        WXLaunchMiniProgram.Req req = new WXLaunchMiniProgram.Req();
+        req.userName = xcxid; // 填小程序原始id
+        //req.path = null;                  //拉起小程序页面的可带参路径，不填默认拉起小程序首页
+        req.miniprogramType = WXLaunchMiniProgram.Req.MINIPROGRAM_TYPE_PREVIEW;// 可选打开 开发版，体验版和正式版
+        api.sendReq(req);
+    }
+
 
 }
 

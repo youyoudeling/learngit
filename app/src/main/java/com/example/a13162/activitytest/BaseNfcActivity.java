@@ -2,7 +2,10 @@ package com.example.a13162.activitytest;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.nfc.NfcAdapter;
+import android.nfc.tech.MifareClassic;
+import android.nfc.tech.NfcA;
 import android.support.v7.app.AppCompatActivity;
 /**
  * Author:Created by Ricky on 2017/8/25.
@@ -16,6 +19,8 @@ import android.support.v7.app.AppCompatActivity;
 public class BaseNfcActivity extends AppCompatActivity {
     protected NfcAdapter mNfcAdapter;
     private PendingIntent mPendingIntent;
+    public static IntentFilter[] mIntentFilter = null;
+    public static String[][] mTechList = null;
 
     /**
      * onCreat->onStart->onResume->onPause->onStop->onDestroy
@@ -28,6 +33,16 @@ public class BaseNfcActivity extends AppCompatActivity {
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         //一旦截获NFC消息，就会通过PendingIntent调用窗口
         mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()), 0);
+        IntentFilter filter = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
+        try {
+            filter.addDataType("*/*");
+        } catch (IntentFilter.MalformedMimeTypeException e) {
+            e.printStackTrace();
+        }
+        mTechList = new String[][]{{MifareClassic.class.getName()},
+                {NfcA.class.getName()}};
+        //生成intentFilter
+        mIntentFilter = new IntentFilter[]{filter};
     }
 
     /**
@@ -38,7 +53,7 @@ public class BaseNfcActivity extends AppCompatActivity {
         super.onResume();
         //设置处理优于所有其他NFC的处理
         if (mNfcAdapter != null)
-            mNfcAdapter.enableForegroundDispatch(this, mPendingIntent, null, null);
+            mNfcAdapter.enableForegroundDispatch(this, mPendingIntent, mIntentFilter, mTechList);
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.example.a13162.activitytest;
 
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +35,7 @@ public class FragmentTag extends Fragment {
     private Button button;
     private int i=0;
     private int k=0;
+    private MainActivity activity;
 
     //public ArrayAdapter<String> adapter;
     public TagAdapter adapter;
@@ -51,7 +54,7 @@ public class FragmentTag extends Fragment {
         //Data.tagListAdd(apple);
         //Data.tagListAdd(banana);
         // Inflate the layout for this fragment
-        SharedPreferences pref=getContext().getSharedPreferences("data",MODE_APPEND);
+        SharedPreferences pref=getContext().getSharedPreferences("data",Context.MODE_PRIVATE);
         i=pref.getInt("number",0);
         Log.d("abcd","i is "+i);
         String editTextTitle,editTextContent;
@@ -129,35 +132,43 @@ public class FragmentTag extends Fragment {
     }
 
     public void showInputDialog(String text){
-        //final EditText editText=new EditText(getActivity());
-        LayoutInflater factory = LayoutInflater.from(getActivity());
-        final View textEntryView = factory.inflate(R.layout.dialog,null);
-
-        final EditText editTextTitle = (EditText)textEntryView.findViewById(R.id.editTextTitle);
-        final EditText editTextContent = (EditText)textEntryView.findViewById(R.id.editTextContent);
-
-        AlertDialog.Builder inputDialog=new AlertDialog.Builder(getActivity());
-        //inputDialog.setTitle("存取该id信息").setView(editText);
-        inputDialog.setTitle("请输入要存取的id信息");
-        inputDialog.setView(textEntryView);
-        editTextTitle.setText("nfc tag");
-        editTextContent.setText(text);
-        inputDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+        final String atext=text;
+        getAvailableActivity(new IActivityEnabledListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                TagClass item=new TagClass(editTextTitle.getText().toString(),editTextContent.getText().toString());
-                Data.tagListAdd(item);
+            public void onActivityEnabled(FragmentActivity activity) {
+//final EditText editText=new EditText(getActivity());
+                LayoutInflater factory = LayoutInflater.from(getActivity());
+                final View textEntryView = factory.inflate(R.layout.dialog,null);
 
-                saveData(editTextTitle.getText().toString(),editTextContent.getText().toString());
+                final EditText editTextTitle = (EditText)textEntryView.findViewById(R.id.editTextTitle);
+                final EditText editTextContent = (EditText)textEntryView.findViewById(R.id.editTextContent);
+
+                AlertDialog.Builder inputDialog=new AlertDialog.Builder(getActivity());
+                //inputDialog.setTitle("存取该id信息").setView(editText);
+                inputDialog.setTitle("请输入要存取的id信息");
+                inputDialog.setView(textEntryView);
+                editTextTitle.setText("nfc tag");
+                editTextContent.setText(atext);
+                inputDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        TagClass item=new TagClass(editTextTitle.getText().toString(),editTextContent.getText().toString());
+                        Data.tagListAdd(item);
+
+                        saveData(editTextTitle.getText().toString(),editTextContent.getText().toString());
 
 
-                //Data.tag(editText.getText().toString());
-                //Toast.makeText(getActivity(),editTextContent.getText().toString(),Toast.LENGTH_SHORT).show();
+                        //Data.tag(editText.getText().toString());
+                        //Toast.makeText(getActivity(),editTextContent.getText().toString(),Toast.LENGTH_SHORT).show();
 
-                adapter.notifyDataSetChanged();
+                        adapter.notifyDataSetChanged();
 
+                    }
+                }).show();
             }
-        }).show();
+        });
+
+
     }
 
     private void saveData(String title,String content){
@@ -170,6 +181,41 @@ public class FragmentTag extends Fragment {
         editor.putInt("number",i);
         editor.apply();
 
+    }
+
+    //用来解决getActivity()返回null的问题
+    protected IActivityEnabledListener aeListener;
+
+    protected interface IActivityEnabledListener{
+        void onActivityEnabled(FragmentActivity activity);
+    }
+
+    protected void getAvailableActivity(IActivityEnabledListener listener){
+        if (getActivity() == null){
+            aeListener = listener;
+
+        } else {
+            listener.onActivityEnabled(getActivity());
+        }
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (aeListener != null){
+            aeListener.onActivityEnabled((FragmentActivity) activity);
+            aeListener = null;
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (aeListener != null){
+            aeListener.onActivityEnabled((FragmentActivity) activity);
+            aeListener = null;
+        }
     }
 
 
