@@ -64,6 +64,7 @@ public class MainActivity extends BaseNfcActivity {
     private FragamentNfc f;
 
     private boolean startFlag=false;     //用于判断是否是在外面扫的小程序
+    public boolean isStartFlag=true;    //用于判断是否应该读取数据
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar,menu);

@@ -2,6 +2,7 @@ package com.example.a13162.activitytest;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -9,8 +10,10 @@ import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NdefFormatable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,23 +21,32 @@ public class TagPageActivity extends BaseNfcActivity implements View.OnClickList
 
     private String myText;
     private Tag detectedTag;
+    private int position;
+    private EditText ptitle;
+    private EditText ptext;
+    private Button tagdele;
+    private Button tagsave;
+    private Button tagwrite;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tag_page_layout);
         Intent intent = getIntent();
-        int position=intent.getIntExtra("extra_data",0);
+        position=intent.getIntExtra("extra_data",0);
         TagClass tag=(TagClass) Data.getTagList().get( position);
-        TextView ptitle=(TextView) findViewById(R.id.pagetitle);
-        TextView ptext= (TextView) findViewById(R.id.pagetext);
+        ptitle=(EditText) findViewById(R.id.pagetitle);
+        ptext= (EditText) findViewById(R.id.pagetext);
         ptitle.setText(((TagClass) Data.getTagList().get(position)).getTitle());
         myText=((TagClass) Data.getTagList().get(position)).getText();
         //ptext.setText(((TagClass) Data.getTagList().get(position)).getText());
         ptext.setText(myText);
-        Button tagdele=(Button)findViewById(R.id.tagdelete);
-        Button tagwrite=(Button)findViewById(R.id.tagwrite);
+        tagdele=(Button)findViewById(R.id.tagdelete);
+        tagsave=(Button)findViewById(R.id.tagsave);
+        tagwrite=(Button)findViewById(R.id.tagwrite);
 
         tagdele.setOnClickListener(this);
+        tagsave.setOnClickListener(this);
         tagwrite.setOnClickListener(this);
 
 
@@ -56,17 +68,40 @@ public class TagPageActivity extends BaseNfcActivity implements View.OnClickList
         switch (v.getId()){
             case R.id.tagdelete:
                 try {
-                    Ndef ndef = Ndef.get(detectedTag);
-                    ndef.connect();
-                    NdefMessage ndefMessage = new NdefMessage(new NdefRecord[]{NdefRecord
-                            .createTextRecord(null,"null")});
+                    Data.getTagList().remove(position);
+                    SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+                    int i=pref.getInt("number",0);
+                    SharedPreferences.Editor editor=pref.edit();
+                    editor.remove("title"+position);
+                    editor.remove("content"+position);
+                    i--;
+                    editor.putInt("number",i);
+                    editor.commit();
                     Toast.makeText(this, "删除成功", Toast.LENGTH_SHORT).show();
-                    ndef.writeNdefMessage(ndefMessage);
+                    tagdele.setEnabled(false);
+                    tagsave.setEnabled(false);
+                    tagwrite.setEnabled(false);
+
                 } catch (Exception e) {
                 }
                 break;
             case R.id.tagwrite:
                 writeNFCTag(detectedTag);
+                break;
+            case R.id.tagsave:
+                try {
+                    Data.getTagList().remove(position);
+                    SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+                    SharedPreferences.Editor editor=pref.edit();
+                    int i=position+1;
+                    Log.d("abcd",i+"");
+                    editor.putString("title"+i,ptitle.getText().toString());
+                    editor.putString("content"+i,ptext.getText().toString());
+                    editor.commit();
+                    Toast.makeText(this, "修改成功", Toast.LENGTH_SHORT).show();
+
+                } catch (Exception e) {
+                }
                 break;
             default:
                 break;
@@ -80,6 +115,7 @@ public class TagPageActivity extends BaseNfcActivity implements View.OnClickList
      */
     public void writeNFCTag(Tag tag) {
         if (tag == null) {
+            Toast.makeText(this, "请先将标签贴住手机，待震动后点击写入", Toast.LENGTH_SHORT).show();
             return;
         }
 //        NdefMessage ndefMessage = new NdefMessage(new NdefRecord[]{NdefRecord

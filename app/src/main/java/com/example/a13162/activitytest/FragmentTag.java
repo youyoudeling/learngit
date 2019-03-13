@@ -24,6 +24,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
 import static android.os.ParcelFileDescriptor.MODE_APPEND;
 
 /**
@@ -54,22 +55,30 @@ public class FragmentTag extends Fragment {
         //Data.tagListAdd(apple);
         //Data.tagListAdd(banana);
         // Inflate the layout for this fragment
-        SharedPreferences pref=getContext().getSharedPreferences("data",Context.MODE_PRIVATE);
+        Log.d("abcd","create fg view");
+        SharedPreferences pref=getContext().getSharedPreferences("data", MODE_PRIVATE);
         i=pref.getInt("number",0);
-        Log.d("abcd","i is "+i);
-        String editTextTitle,editTextContent;
-        for(k=1;k<=i;k++) {
-            editTextTitle=pref.getString("title"+k, "").toString();
-            editTextContent=pref.getString("content"+k, "").toString();
 
-            TagClass item=new TagClass(editTextTitle,editTextContent);
-            Data.tagListAdd(item);
+        Log.d("first i",i+"");
+        //防止多次切换重复读取
+        if(i>Data.getTagList().size()){
+            Log.d("abcd","i is "+i);
+            String editTextTitle,editTextContent;
+            for(k=1;k<=i;k++) {
+                editTextTitle=pref.getString("title"+k, "");
+                editTextContent=pref.getString("content"+k, "");
+
+                TagClass item=new TagClass(editTextTitle,editTextContent);
+                Data.tagListAdd(item);
+            }
+
         }
 
 
         View view=inflater.inflate(R.layout.fragment_tag_layout, container, false);
         //adapter=new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1,Data.getTag())
         adapter=new TagAdapter(getActivity(),R.layout.tag_item,Data.getTagList());
+
         ListView listView=(ListView) view.findViewById(R.id.tag_list);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -174,12 +183,13 @@ public class FragmentTag extends Fragment {
     private void saveData(String title,String content){
 
         i++;
-        SharedPreferences.Editor editor= getContext().getSharedPreferences("data",Context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor= getContext().getSharedPreferences("data", MODE_PRIVATE).edit();
         Log.d("abcde","i is "+i);
         editor.putString("title"+i,title);
         editor.putString("content"+i,content);
         editor.putInt("number",i);
-        editor.apply();
+        editor.commit();
+        Log.d("after commit i",i+"");
 
     }
 
@@ -212,11 +222,20 @@ public class FragmentTag extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        Log.d("abcd","ft attach");
         if (aeListener != null){
             aeListener.onActivityEnabled((FragmentActivity) activity);
             aeListener = null;
         }
     }
 
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        adapter.notifyDataSetChanged();
+        SharedPreferences pref=getContext().getSharedPreferences("data", MODE_PRIVATE);
+        i=pref.getInt("number",0);
+        Log.d("abcd","ft onresume");
+        Log.d("resume i",i+"");
+    }
 }

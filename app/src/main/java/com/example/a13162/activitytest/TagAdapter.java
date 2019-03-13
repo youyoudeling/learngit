@@ -22,6 +22,7 @@ public class TagAdapter extends ArrayAdapter {
 
     @Override
     public View getView(int position,  View convertView, ViewGroup parent) {
+        this.notifyDataSetChanged();
         TagClass tag =(TagClass) getItem(position);
         View view = LayoutInflater.from(getContext()).inflate(resourceId,parent,false);
         TextView title=(TextView) view.findViewById(R.id.title);
