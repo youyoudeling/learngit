@@ -72,8 +72,14 @@ public class TagPageActivity extends BaseNfcActivity implements View.OnClickList
                     SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
                     int i=pref.getInt("number",0);
                     SharedPreferences.Editor editor=pref.edit();
-                    editor.remove("title"+position);
-                    editor.remove("content"+position);
+                    int mypos=position+1;
+                    editor.remove("title"+mypos);
+                    editor.remove("content"+mypos);
+                    for(int j=mypos;j<i;j++){
+                        int k=j+1;
+                        editor.putString("title"+j,pref.getString("title"+k,""));
+                        editor.putString("content"+j,pref.getString("content"+k,""));
+                    }
                     i--;
                     editor.putInt("number",i);
                     editor.commit();
@@ -90,13 +96,14 @@ public class TagPageActivity extends BaseNfcActivity implements View.OnClickList
                 break;
             case R.id.tagsave:
                 try {
-                    Data.getTagList().remove(position);
                     SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
                     SharedPreferences.Editor editor=pref.edit();
-                    int i=position+1;
-                    Log.d("abcd",i+"");
-                    editor.putString("title"+i,ptitle.getText().toString());
-                    editor.putString("content"+i,ptext.getText().toString());
+                    int mypos=position+1;
+                    Log.d("abcd",mypos+"");
+                    TagClass item=new TagClass(ptitle.getText().toString(),ptext.getText().toString());
+                    Data.getTagList().set(position,item);
+                    editor.putString("title"+mypos,ptitle.getText().toString());
+                    editor.putString("content"+mypos,ptext.getText().toString());
                     editor.commit();
                     Toast.makeText(this, "修改成功", Toast.LENGTH_SHORT).show();
 
